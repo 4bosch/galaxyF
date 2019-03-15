@@ -12,8 +12,6 @@ public class Bonus3 extends InteractiveTileObject {
         super(world, map, bounds);
         fixture.setUserData(this);
         setCategoryFilter(GalaxyFighter.BONUS3_BIT);
-
-
     }
 
     @Override

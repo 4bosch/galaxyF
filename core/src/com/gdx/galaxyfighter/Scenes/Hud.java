@@ -58,19 +58,26 @@ public class Hud implements Disposable {
     }
 
     public static void ajoutScore(int valeur){
-
         score += valeur;
         scoreLabel.setText(String.format("%04d", score));
 
     }
 
     public static int returnScore(){
-
         return score;
     }
 
+    public void perdVie(){
+        life--;
+        lifeLabel.setText(String.format("%02d", life));
+    }
+
+    public int returnVie(){
+        return life;
+    }
+
     @Override
-    public void dispose() {
+    public void dispose(){
         stage.dispose();
     }
 }

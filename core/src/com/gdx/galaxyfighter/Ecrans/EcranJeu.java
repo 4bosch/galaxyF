@@ -85,20 +85,25 @@ public class EcranJeu implements Screen {
 
     //Cette methode gere les deplacements du vaisseau. En fonction de la direction une force lui est applique
     //avec une vitesse maximale.
-    public void handleInput(){
+    public void handleInput(float dt){
         float maxVel = 100f;
         float minVel = -100f;
-        float plusVel = 20f;
-        float minusVel = -20f;
+        float plusVel = 50f;
+        float minusVel = -50f;
+        float shipVelX = player.b2body.getLinearVelocity().x;
+        float shipVelY = player.b2body.getLinearVelocity().y;
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP) && player.b2body.getLinearVelocity().y <= maxVel)
             player.b2body.applyLinearImpulse(new Vector2(0, plusVel), player.b2body.getWorldCenter(), true);
-        if(Gdx.input.isKeyPressed(Input.Keys.DOWN) && player.b2body.getLinearVelocity().y >= minVel)
+        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) && player.b2body.getLinearVelocity().y >= minVel)
             player.b2body.applyLinearImpulse(new Vector2(0, minusVel), player.b2body.getWorldCenter(), true);
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.b2body.getLinearVelocity().x <= maxVel)
+        else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.b2body.getLinearVelocity().x <= maxVel)
             player.b2body.applyLinearImpulse(new Vector2(plusVel, 0), player.b2body.getWorldCenter(), true);
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.b2body.getLinearVelocity().x >= minVel)
+        else if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.b2body.getLinearVelocity().x >= minVel)
             player.b2body.applyLinearImpulse(new Vector2(minusVel, 0), player.b2body.getWorldCenter(), true);
+        else if(shipVelX > 0 || shipVelY > 0 || shipVelX < 0 || shipVelY < 0)
+            player.b2body.setLinearVelocity( shipVelX / 1.04f, shipVelY / 1.04f);
+        System.out.println("Velocity x = " + shipVelX + " | y = " + shipVelY);
     }
 
     //Cette methode permet de limiter le joueur dans la zone de la camera. Il ne peut donc ainsi sortir du champ de la camera.
@@ -115,13 +120,13 @@ public class EcranJeu implements Screen {
     }
 
     //Cette methode se charge de mettre a jour tous les elements affiches
-    public void update(){
-        handleInput();
+    public void update(float dt){
+        handleInput(dt);
         //Indique le nombre de fois le moteur physique peut calculer par seconde
         world.step(1/60f, 6, 2);
         //Permet de stopper le scrolling a la fin du niveau
-       // if(cam.position.y < maxScrolling)
-      //      cam.translate(0, 0.5f);
+        if(cam.position.y < maxScrolling)
+            cam.translate(0, 0.5f);
         //cette methode limite le joueur dans le champs de la camera
         limitPlayer();
         spriteSpaceShip = (Sprite) player.b2body.getUserData();
@@ -137,7 +142,7 @@ public class EcranJeu implements Screen {
     //Le delta est le nombre de secondes entre chaque frame/image
     @Override
     public void render(float delta) {
-        update();
+        update(delta);
         //nettoie l'ecran de jeu avec du noir
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

@@ -9,7 +9,6 @@ public class GalaxyFighter extends Game {
 
     public static final int V_WIDTH = 208;
     public static final int V_HEIGHT = 400;
-    public static final float PPM = 100;
 
     public static final short SPACESHIP_BIT = 2;
     public static final short BONUS1_BIT = 8;
