@@ -17,11 +17,11 @@ public class Hud implements Disposable {
     private Viewport viewport;
 
     private Integer life;
-    private Integer score;
+    private static Integer score;
     private Integer niveau;
 
     Label lifeLabel;
-    Label scoreLabel;
+    private static Label scoreLabel;
     Label niveauLabel;
     Label lifeStrLabel;
     Label scoreStrLabel;
@@ -55,6 +55,18 @@ public class Hud implements Disposable {
         table.add(scoreLabel).expandX();
 
         stage.addActor(table);
+    }
+
+    public static void ajoutScore(int valeur){
+
+        score += valeur;
+        scoreLabel.setText(String.format("%04d", score));
+
+    }
+
+    public static int returnScore(){
+
+        return score;
     }
 
     @Override
