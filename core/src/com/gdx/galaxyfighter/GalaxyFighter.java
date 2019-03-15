@@ -25,7 +25,7 @@ public class GalaxyFighter extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new EcranJeu(this));
+        setScreen(new EcranJeu(this, 650));
     }
 
     @Override
