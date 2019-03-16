@@ -16,7 +16,6 @@ public class Bonus3 extends InteractiveTileObject {
 
     @Override
     public void OnHit() {
-
         Gdx.app.log("Bonus3","Collision");
         //On détruit le bonus après contact
         setCategoryFilter(GalaxyFighter.DESTROYED_BIT);

@@ -33,11 +33,11 @@ public abstract class InteractiveTileObject {
         PolygonShape shape = new PolygonShape();
 
         bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set((bounds.getX() + bounds.getWidth() / 2), (bounds.getY() + bounds.getHeight() / 2));
+        bdef.position.set((bounds.getX() + bounds.getWidth() / 2) / GalaxyFighter.PPM, (bounds.getY() + bounds.getHeight() / 2) / GalaxyFighter.PPM);
 
         body = world.createBody(bdef);
 
-        shape.setAsBox(bounds.getWidth() / 2, bounds.getHeight() / 2);
+        shape.setAsBox(bounds.getWidth() / 2 / GalaxyFighter.PPM, bounds.getHeight() / 2 / GalaxyFighter.PPM);
         fdef.shape = shape;
         fixture = body.createFixture(fdef);
 
@@ -48,17 +48,15 @@ public abstract class InteractiveTileObject {
     public abstract void OnHit();
 
     //Méthode qui va nous servir à filtrer les différentes categories de contact
-
     public void setCategoryFilter(short filterBit){
         Filter filter = new Filter();
         filter.categoryBits = filterBit;
         fixture.setFilterData(filter);
-
     }
 
     //Méthode qui permettras d'enlever un élément du décor après contact
     public TiledMapTileLayer.Cell getCell(){
         TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-        return layer.getCell((int) (body.getPosition().x / 16),(int)(body.getPosition().y / 16));
+        return layer.getCell((int) (body.getPosition().x * GalaxyFighter.PPM / 16),(int)(body.getPosition().y * GalaxyFighter.PPM / 16));
     }
 }
