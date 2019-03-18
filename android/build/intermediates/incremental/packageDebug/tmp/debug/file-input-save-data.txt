@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Sat Mar 16 20:15:47 CET 2019
+#Sat Mar 16 23:44:13 CET 2019
 17.baseType=DIRECTORY
 4.path=img/btn_play.png
 25.base=D\:\\Projects\\galaxyF\\android\\build\\intermediates\\transforms\\mergeJniLibs\\debug\\0

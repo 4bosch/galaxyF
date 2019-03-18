@@ -122,18 +122,24 @@ public class EcranJeu implements Screen {
 
     //Cette methode se charge de mettre a jour tous les elements affiches
     public void update(float dt){
+        //Cette methode gere les inputs du joueur
         handleInput(dt);
+
         //Indique le nombre de fois le moteur physique peut calculer par seconde
         world.step(1/60f, 6, 2);
+
         //On bouge vers le haut la camera jusqu'a la fin du niveau
-       if(cam.position.y < maxScrolling / GalaxyFighter.PPM)
+       if(cam.position.y < (maxScrolling / GalaxyFighter.PPM) )
             cam.translate(0, 0.5f / GalaxyFighter.PPM);
         //cette methode limite le joueur dans le champs de la camera
         limitPlayer();
-        spriteSpaceShip = (Sprite) player.b2body.getUserData();
-        spriteSpaceShip.setX(player.b2body.getPosition().x * GalaxyFighter.PPM - 8);
-        spriteSpaceShip.setY(player.b2body.getPosition().y * GalaxyFighter.PPM - 8);
-         //actualise la camera afin qu'elle affiche les changements effectue auparavant
+
+        //on attache dessine le sprite au dessus de l'objet du vaisseau
+        //spriteSpaceShip = (Sprite) player.b2body.getUserData();
+        spriteSpaceShip.setPosition(player.b2body.getPosition().x * GalaxyFighter.PPM - 8, player.b2body.getPosition().y * GalaxyFighter.PPM - 8);
+        System.out.println("Pos player x = " + (player.b2body.getPosition().x * GalaxyFighter.PPM - 8) + " y = " + (player.b2body.getPosition().y * GalaxyFighter.PPM - 8));
+        System.out.println("Pos sprite x = " + spriteSpaceShip.getX() + " y = " + spriteSpaceShip.getY());
+        //actualise la camera afin qu'elle affiche les changements effectue auparavant
         cam.update();
         renderer.setView(cam);
     }
@@ -144,18 +150,22 @@ public class EcranJeu implements Screen {
     @Override
     public void render(float delta) {
         update(delta);
+
         //nettoie l'ecran de jeu avec du noir
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         //fait le rendu de la carte
         renderer.render();
+
         //fait le rendu de Box2DDebugLines
         b2dr.render(world, cam.combined);
 
-        jeu.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+        jeu.batch.setProjectionMatrix(cam.combined);
+
         hud.stage.draw();
-        //fait le rendu du sprite du vaisseau
         jeu.batch.begin();
+        //fait le rendu du sprite du vaisseau
         spriteSpaceShip.draw(jeu.batch);
         jeu.batch.end();
     }
