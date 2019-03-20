@@ -48,7 +48,7 @@ public class EcranJeu implements Screen {
         //creation de la camera qui suivera le vaisseau
         cam = new OrthographicCamera();
         //creation d'un viewport qui conservera son ratio et qui ajoutera des bars si besoin
-        gamePort = new FitViewport(GalaxyFighter.V_WIDTH , GalaxyFighter.V_HEIGHT , cam);
+        gamePort = new FitViewport(GalaxyFighter.V_WIDTH / GalaxyFighter.PPM, GalaxyFighter.V_HEIGHT / GalaxyFighter.PPM, cam);
         //creation du Hud pour afficher le niveau, le score et les vies
         hud = new Hud(jeu.batch);
         //creation d'une variable permettant d'arreter le scrolling a la fin du niveau
@@ -57,7 +57,7 @@ public class EcranJeu implements Screen {
         //charge la carte et mise en place du rendu de la carte
         maploader = new TmxMapLoader();
         map = maploader.load("level1.tmx");
-        renderer = new OrthogonalTiledMapRenderer(map, 1 );
+        renderer = new OrthogonalTiledMapRenderer(map, 1 / GalaxyFighter.PPM);
 
         //on change la position initialle de la camera sur le debut de la carte centre au milieu
         cam.position.set(gamePort.getWorldWidth() / 2, gamePort.getWorldHeight() / 2, 0);
@@ -86,10 +86,10 @@ public class EcranJeu implements Screen {
     //Cette methode gere les deplacements du vaisseau. En fonction de la direction une force lui est applique
     //avec une vitesse maximale.
     public void handleInput(float dt){
-        float maxVel = 100f;
-        float minVel = -100f;
-        float plusVel = 50f;
-        float minusVel = -50f;
+        float maxVel = 1f;
+        float minVel = -1f;
+        float plusVel = 0.1f;
+        float minusVel = -0.1f;
         float shipVelX = player.b2body.getLinearVelocity().x;
         float shipVelY = player.b2body.getLinearVelocity().y;
 
@@ -103,7 +103,6 @@ public class EcranJeu implements Screen {
             player.b2body.applyLinearImpulse(new Vector2(minusVel, 0), player.b2body.getWorldCenter(), true);
         else if(shipVelX > 0 || shipVelY > 0 || shipVelX < 0 || shipVelY < 0)
             player.b2body.setLinearVelocity( shipVelX / 1.04f, shipVelY / 1.04f);
-        System.out.println("Velocity x = " + shipVelX + " | y = " + shipVelY);
     }
 
     //Cette methode permet de limiter le joueur dans la zone de la camera. Il ne peut donc ainsi sortir du champ de la camera.
@@ -113,25 +112,33 @@ public class EcranJeu implements Screen {
     {
         //La camera se situant au milieu du viewport on ajoute ou retire la moite de la hauteur du viewport
         //afin de se retrouver au niveau des bords.
-        if(player.b2body.getPosition().y > cam.position.y - 5 + GalaxyFighter.V_HEIGHT / 2)
-            player.b2body.applyLinearImpulse(new Vector2(0, player.b2body.getLinearVelocity().y * -1 - 20), player.b2body.getWorldCenter(), true);
-        if(player.b2body.getPosition().y < cam.position.y + 10 - GalaxyFighter.V_HEIGHT / 2)
-            player.b2body.applyLinearImpulse(new Vector2(0, player.b2body.getLinearVelocity().y * -1 + 50), player.b2body.getWorldCenter(), true);
+        if(player.b2body.getPosition().y  > cam.position.y + GalaxyFighter.V_HEIGHT / 2 / GalaxyFighter.PPM) {
+            player.b2body.applyLinearImpulse(new Vector2(0, player.b2body.getLinearVelocity().y * -1 - 0.2f), player.b2body.getWorldCenter(), true);
+        }
+        if(player.b2body.getPosition().y < cam.position.y - GalaxyFighter.V_HEIGHT / 2 / GalaxyFighter.PPM) {
+            player.b2body.applyLinearImpulse(new Vector2(0, player.b2body.getLinearVelocity().y * -1 + 0.5f), player.b2body.getWorldCenter(), true);
+        }
     }
 
     //Cette methode se charge de mettre a jour tous les elements affiches
     public void update(float dt){
+        //Cette methode gere les inputs du joueur
         handleInput(dt);
+
         //Indique le nombre de fois le moteur physique peut calculer par seconde
         world.step(1/60f, 6, 2);
-        //Permet de stopper le scrolling a la fin du niveau
-        if(cam.position.y < maxScrolling)
-            cam.translate(0, 0.5f);
+
+        //On bouge vers le haut la camera jusqu'a la fin du niveau
+       if(cam.position.y < (maxScrolling / GalaxyFighter.PPM) )
+            cam.translate(0, 0.5f / GalaxyFighter.PPM);
         //cette methode limite le joueur dans le champs de la camera
         limitPlayer();
-        spriteSpaceShip = (Sprite) player.b2body.getUserData();
-        spriteSpaceShip.setX(player.b2body.getPosition().x - 8);
-        spriteSpaceShip.setY(player.b2body.getPosition().y - 8);
+
+        //on attache dessine le sprite au dessus de l'objet du vaisseau
+        //spriteSpaceShip = (Sprite) player.b2body.getUserData();
+        spriteSpaceShip.setPosition(player.b2body.getPosition().x * GalaxyFighter.PPM - 8, player.b2body.getPosition().y * GalaxyFighter.PPM - 8);
+        System.out.println("Pos player x = " + (player.b2body.getPosition().x * GalaxyFighter.PPM - 8) + " y = " + (player.b2body.getPosition().y * GalaxyFighter.PPM - 8));
+        System.out.println("Pos sprite x = " + spriteSpaceShip.getX() + " y = " + spriteSpaceShip.getY());
         //actualise la camera afin qu'elle affiche les changements effectue auparavant
         cam.update();
         renderer.setView(cam);
@@ -143,18 +150,22 @@ public class EcranJeu implements Screen {
     @Override
     public void render(float delta) {
         update(delta);
+
         //nettoie l'ecran de jeu avec du noir
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         //fait le rendu de la carte
         renderer.render();
+
         //fait le rendu de Box2DDebugLines
         b2dr.render(world, cam.combined);
 
-        jeu.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+        jeu.batch.setProjectionMatrix(cam.combined);
+
         hud.stage.draw();
-        //fait le rendu du sprite du vaisseau
         jeu.batch.begin();
+        //fait le rendu du sprite du vaisseau
         spriteSpaceShip.draw(jeu.batch);
         jeu.batch.end();
     }
